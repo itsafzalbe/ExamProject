@@ -16,7 +16,7 @@ class ConnectData:
         print("\n--- LOGIN PAGE ----")
         name = input("Enter username: ")
         password = input("Enter password: ")
-        self.cursor.execute("""SELECT user_id, name, user_type FROM users WHERE name= %s AND password = %s""", (name, password))
+        self.cursor.execute("SELECT user_id, name, user_type FROM users WHERE name= %s AND password = %s", (name, password))
         user = self.cursor.fetchone()
 
         if user:
@@ -29,7 +29,7 @@ class ConnectData:
     #===================================================================================================================
     # View Products For Admin and Customers
     def view_fruits(self):
-        self.cursor.execute("""SELECT * FROM products WHERE category_id = 1;""")
+        self.cursor.execute("SELECT * FROM products WHERE category_id = 1;")
         fruits = self.cursor.fetchall()
         print("\n--- FRUITS ---")
         for item in fruits:
@@ -41,7 +41,7 @@ Price: ${item[2]} per kg
 Quantity: {item[3]}
 """)
     def view_vegetables(self):
-        self.cursor.execute("""SELECT * FROM products WHERE category_id = 2;""")
+        self.cursor.execute("SELECT * FROM products WHERE category_id = 2;")
         vegetables = self.cursor.fetchall()
         print("\n--- VEGETABLES ---")
         for item in vegetables:
@@ -257,17 +257,17 @@ Quantity: {item[3]}
             elif usr_input == 5:
                 self.view_snacks()
                 s_id = int(input("Enter the ID of Snack or Candy you want to delete: "))
-                self.cursor.execute("""SELECT product_id FROM products WHERE category_id = %s AND product_id = %s;""", (usr_input, s_id))
+                self.cursor.execute("SELECT product_id FROM products WHERE category_id = %s AND product_id = %s;", (usr_input, s_id))
                 product = self.cursor.fetchone()
                 if not product:
                     print("Product with this ID not found.")
                     return
-                self.cursor.execute("""DELETE FROM products WHERE category_id = %s AND product_id = %s""", (usr_input, s_id))
+                self.cursor.execute("DELETE FROM products WHERE category_id = %s AND product_id = %s", (usr_input, s_id))
                 self.connection.commit()
             else:
                 break
     def view_shop_balance_admin(self):
-        self.cursor.execute("""SELECT * FROM shops""")
+        self.cursor.execute("SELECT * FROM shops")
         shops = self.cursor.fetchall()
         print("\n--- MARKETS BALANCE ---")
         for shop in shops:
@@ -300,7 +300,7 @@ Quantity: {item[3]}
             print(f"    - {product_name} x {quantity} = {price * quantity}")
     #===================================================================================================================
     def add_to_basket(self, user_id, product_id, user_quantity):
-        self.cursor.execute("""SELECT name, price, quantity FROM products WHERE product_id = %s;""", (product_id,))
+        self.cursor.execute("SELECT name, price, quantity FROM products WHERE product_id = %s;", (product_id,))
         product = self.cursor.fetchone()
         if not product:
             print("No product found with this ID!")
@@ -310,7 +310,7 @@ Quantity: {item[3]}
             print(f"Not enough in stock! Only {available_quantity} left")
             return
 
-        self.cursor.execute("""SELECT basket_id FROM baskets WHERE user_id = %s;""", (user_id,))
+        self.cursor.execute("SELECT basket_id FROM baskets WHERE user_id = %s;", (user_id,))
         basket = self.cursor.fetchone()
         if not basket:
             print("Basket not found for this user!")
@@ -334,7 +334,7 @@ Quantity: {item[3]}
         p_id = int(input("Enter the ID of the product to add to basket (0 to go back): "))
         if p_id == 0:
             return
-        self.cursor.execute("""SELECT * FROM products WHERE category_id =%s AND product_id =%s;""", (n, p_id))
+        self.cursor.execute("SELECT * FROM products WHERE category_id =%s AND product_id =%s;", (n, p_id))
         product = self.cursor.fetchone()
         if not product:
             print("No product found with this ID!")
@@ -378,7 +378,7 @@ Quantity: {item[3]}
                 break
 
     def view_basket(self, user_id):
-        self.cursor.execute("""SELECT basket_id FROM baskets WHERE user_id = %s;""", (user_id,))
+        self.cursor.execute("SELECT basket_id FROM baskets WHERE user_id = %s;", (user_id,))
         basket = self.cursor.fetchone()
         basket_id = basket[0]
         query = """
