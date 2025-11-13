@@ -1,4 +1,5 @@
 import psycopg2
+import re
 
 class ConnectData:
     def __init__(self, dbname, user, password, host="localhost", port=5433):
@@ -26,6 +27,14 @@ class ConnectData:
         else:
             print("User not found !")
             return None
+
+    def valid_input(self, prompt, pattern, error_message):
+        while True:
+            value = input(prompt)
+            if re.match(pattern, value):
+                return value
+            print(error_message)
+
     #===================================================================================================================
     # View Products For Admin and Customers
     def view_fruits(self):
@@ -90,10 +99,17 @@ Price: {item[2]} per pcs
 Quantity: {item[3]}
 """)
     #===================================================================================================================
+    def show_users(self):
+        self.cursor.execute("SELECT user_id, name, phone, user_type FROM users WHERE user_type <> 'admin';")
+        users = self.cursor.fetchall()
+        print("\n--- USERS ---")
+        for user in users:
+            print(f"User ID: {user[0]}, Name: {user[1]}, Phone: {user[2]}, UserType: {user[3]}")
+    #===================================================================================================================
     def p_details(self, cat):
         p_name = input("Product Name: ")
         p_price = float(input("Price ($/kg or $/pcs): "))
-        p_quantity = int(input("Quantity (in kg/pcs): "))
+        p_quantity = self.valid_input("Quantity (in kg/pcs): ", r"^\d+$", "Quantity must be number only.")
         self.cursor.execute("""INSERT INTO products (name, price, quantity, category_id) VALUES (%s, %s, %s, %s);""", (p_name, p_price, p_quantity, cat))
         self.connection.commit()
         print("Added")
@@ -155,7 +171,7 @@ Quantity: {item[3]}
             self.connection.commit()
             print("Updated!!!")
         elif choice == '3':
-            new_quantity = int(input("Enter the new product quantity: "))
+            new_quantity = self.valid_input("Enter the new product quantity: ", r"^\d+$", "Quantity must be number only.")
             self.cursor.execute("""UPDATE products SET quantity = %s WHERE category_id = %s AND product_id = %s;""", (new_quantity, cat_id, p_id))
             self.connection.commit()
             print("Updated!!!")
@@ -299,6 +315,21 @@ Quantity: {item[3]}
                 current_order = order_id
             print(f"    - {product_name} x {quantity} = {price * quantity}")
     #===================================================================================================================
+    def view_user_balance(self, user):
+        user_id = user['id']
+        self.cursor.execute("SELECT balance FROM users WHERE user_id = %s;", (user_id,))
+        balance = self.cursor.fetchone()[0]
+        print(f"\nYour Current Balance: ${balance}")
+
+    def top_up_balance_user(self, user):
+        user_id = user['id']
+        top_up_amount = input("Top up amount: ")
+        self.cursor.execute("UPDATE users SET balance = balance + %s WHERE user_id = %s;", (top_up_amount, user_id))
+        self.connection.commit()
+        print("Success!")
+        self.view_user_balance(user)
+
+    #===================================================================================================================
     def add_to_basket(self, user_id, product_id, user_quantity):
         self.cursor.execute("SELECT name, price, quantity FROM products WHERE product_id = %s;", (product_id,))
         product = self.cursor.fetchone()
@@ -340,7 +371,8 @@ Quantity: {item[3]}
             print("No product found with this ID!")
             return
         product_id, name, price, available_quantity, category_id = product
-        qty = int(input(f"Enter quantity to add to basket for {name}: "))
+        qty = self.valid_input(f"Enter quantity to add to basket for {name}: ", r"^\d+$", "Quantity must be number only.")
+        qty = int(qty)
         if qty <= 0:
             print("Quantity must be positive.")
             return
@@ -424,7 +456,8 @@ Quantity: {item[3]}
             return
         p_id, name, price, available_qty = product
         print(f"Current quantity in basket: {old_qty}")
-        new_qty = int(input(f"Enter new quantity for {name} (available at the store: {available_qty}): "))
+        new_qty = self.valid_input(f"Enter new quantity for {name} (available at the store: {available_qty}): ", r"^\d+$", "Quantity must be number only.")
+        new_qty = int(new_qty)
         if new_qty > available_qty:
             print(f"Not enough in stock! Only {available_qty} left")
             return
@@ -470,7 +503,6 @@ Quantity: {item[3]}
             return
         new_balance = balance - total
         self.cursor.execute("UPDATE users SET balance = %s WHERE user_id = %s;", (new_balance, user_id))
-
         self.cursor.execute("INSERT INTO orders (user_id, total_amount, created_at) VALUES (%s, %s, NOW()) RETURNING order_id;", (user_id, total))
         orders = self.cursor.fetchone()
         order_id = orders[0]
