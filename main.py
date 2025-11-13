@@ -18,7 +18,8 @@ def admin_menu(user):
         print("4. Edit Product")
         print("5. View Balance")
         print("6. View Sold Items")
-        print("7. Edit User Info")
+        print("7. Edit Your Info")
+        print("8. Show Users")
         print("0. Logout")
         choice = input("Your choice: ")
         if choice == "1":
@@ -35,6 +36,8 @@ def admin_menu(user):
             db.view_sold_items()
         elif choice == "7":
             db.edit_info_users(user)
+        elif choice == "8":
+            db.show_users()
         elif choice == "0":
             break
 def customer_menu(user):
@@ -44,7 +47,9 @@ def customer_menu(user):
         print("2. View Items in Basket")
         print("3. Edit Basket Items")
         print("4. Proceed to payment")
-        print("5. Edit User Info")
+        print("5. Edit Your Info")
+        print("6. View Balance")
+        print("7. Top your Balance")
         print("0. Log out")
         choice = input("Your choice: ")
         if choice == "1":
@@ -57,6 +62,10 @@ def customer_menu(user):
             db.proceed_to_payment(user)
         elif choice == "5":
             db.edit_info_users(user)
+        elif choice == "6":
+            db.view_user_balance(user)
+        elif choice == "7":
+            db.top_up_balance_user(user)
         elif choice == "0":
             break
 def main():
