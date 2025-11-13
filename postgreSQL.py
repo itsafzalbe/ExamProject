@@ -1,5 +1,3 @@
-from symbol import continue_stmt
-
 import psycopg2
 
 class ConnectData:
@@ -299,7 +297,7 @@ Quantity: {item[3]}
                     print()
                 print(f"Customer: {customer_name} bought items worth: ${total_amount}")
                 current_order = order_id
-            print(f"    - {product_name} X {quantity} = {price * quantity}")
+            print(f"    - {product_name} x {quantity} = {price * quantity}")
     #===================================================================================================================
     def add_to_basket(self, user_id, product_id, user_quantity):
         self.cursor.execute("""SELECT name, price, quantity FROM products WHERE product_id = %s;""", (product_id,))
@@ -330,7 +328,7 @@ Quantity: {item[3]}
         else:
             self.cursor.execute("INSERT INTO basket_items (basket_id, product_id, quantity) VALUES (%s, %s, %s);", (basket_id, product_id, user_quantity))
         self.connection.commit()
-        print(f"{user_quantity}kg/pcs X {name} added to basket.")
+        print(f"{user_quantity}kg/pcs x {name} added to basket.")
 
     def user_choices(self, n, user):
         p_id = int(input("Enter the ID of the product to add to basket (0 to go back): "))
@@ -397,7 +395,7 @@ Quantity: {item[3]}
         print("\n--- YOUR BASKET ---")
         for item_id, p_id, p_name, p_quantity, p_price in items:
             print(f"""\nItems -> Item ID: {item_id}, Product ID: {p_id}.
-    {p_name} - {p_quantity}pcs/kgs X ${p_price}""")
+    {p_name} - {p_quantity}pcs/kgs x ${p_price}""")
 
     def edit_basket(self, user_id):
         self.view_basket(user_id)
